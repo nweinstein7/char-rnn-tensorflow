@@ -75,7 +75,7 @@ def train(args):
         assert saved_vocab==data_loader.vocab, "Data and loaded model disagree on dictionary mappings!"
 
     if not os.path.exists(args.save_dir):
-      os.makedirs(destination_dir)
+      os.makedirs(args.save_dir)
       assert os.path.exists(args.save_dir)
     with open(os.path.join(args.save_dir, 'config.pkl'), 'wb') as f:
         cPickle.dump(args, f)
