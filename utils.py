@@ -3,6 +3,7 @@ import os
 import collections
 from six.moves import cPickle
 import numpy as np
+import re
 
 class TextLoader():
     def __init__(self, data_dir, batch_size, seq_length, encoding='utf-8'):
@@ -27,14 +28,16 @@ class TextLoader():
     def preprocess(self, input_file, vocab_file, tensor_file):
         with codecs.open(input_file, "r", encoding=self.encoding) as f:
             data = f.read()
-        counter = collections.Counter(data)
+        clean_data = re.compile('\w+').findall(data.lower())
+        print(clean_data)
+        counter = collections.Counter(clean_data)
         count_pairs = sorted(counter.items(), key=lambda x: -x[1])
         self.chars, _ = zip(*count_pairs)
         self.vocab_size = len(self.chars)
         self.vocab = dict(zip(self.chars, range(len(self.chars))))
         with open(vocab_file, 'wb') as f:
             cPickle.dump(self.chars, f)
-        self.tensor = np.array(list(map(self.vocab.get, data)))
+        self.tensor = np.array(list(map(self.vocab.get, clean_data)))
         np.save(tensor_file, self.tensor)
 
     def load_preprocessed(self, vocab_file, tensor_file):
