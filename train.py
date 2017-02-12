@@ -91,11 +91,13 @@ def train(args):
         # restore model
         if args.init_from is not None:
             saver.restore(sess, ckpt.model_checkpoint_path)
+        min_train_loss = None
         for e in range(args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
             state = sess.run(model.initial_state)
             for b in range(data_loader.num_batches):
+                step = e * data_loader.num_batches + b
                 start = time.time()
                 x, y = data_loader.next_batch()
                 feed = {model.input_data: x, model.targets: y}
@@ -105,15 +107,16 @@ def train(args):
                 train_loss, state, _, summary = sess.run([model.cost, model.final_state, model.train_op, model.summary_op], feed)
                 end = time.time()
                 print("{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
-                    .format(e * data_loader.num_batches + b,
+                    .format(step,
                             args.num_epochs * data_loader.num_batches,
                             e, train_loss, end - start))
-                writer.add_summary(summary, e)
-                if (e * data_loader.num_batches + b) % args.save_every == 0\
-                    or (e==args.num_epochs-1 and b == data_loader.num_batches-1): # save for the last result
+                writer.add_summary(summary, step)
+                if not min_train_loss or train_loss < min_train_loss:
+                    print("Min_train_loss {}".format(min_train_loss))
                     checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
-                    saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
+                    saver.save(sess, checkpoint_path, global_step = step)
                     print("model saved to {}".format(checkpoint_path))
+                    min_train_loss = train_loss
 
 if __name__ == '__main__':
     main()

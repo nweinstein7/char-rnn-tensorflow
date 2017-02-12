@@ -4,6 +4,7 @@ import collections
 from six.moves import cPickle
 import numpy as np
 import re
+from custom_parser import custom_parse
 
 class TextLoader():
     def __init__(self, data_dir, batch_size, seq_length, encoding='utf-8'):
@@ -28,9 +29,9 @@ class TextLoader():
     def preprocess(self, input_file, vocab_file, tensor_file):
         with codecs.open(input_file, "r", encoding=self.encoding) as f:
             data = f.read()
-        clean_data = re.compile('\w+').findall(data.lower())
-        print(clean_data)
+        clean_data = custom_parse(data.lower())
         counter = collections.Counter(clean_data)
+        print(counter)
         count_pairs = sorted(counter.items(), key=lambda x: -x[1])
         self.chars, _ = zip(*count_pairs)
         self.vocab_size = len(self.chars)

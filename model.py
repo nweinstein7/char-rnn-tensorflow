@@ -96,6 +96,6 @@ class Model():
             pred = chars[sample]
             ret.append(pred)
             char = pred
-        return " ".join(ret)
+        return "".join(ret)
 
 
