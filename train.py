@@ -70,9 +70,11 @@ def train(args):
         
         # open saved vocab/dict and check if vocabs/dicts are compatible
         with open(os.path.join(args.init_from, 'chars_vocab.pkl'), 'rb') as f:
-            saved_chars, saved_vocab = cPickle.load(f)
+            saved_chars, saved_vocab, saved_tags, saved_tag_dict = cPickle.load(f)
         assert saved_chars==data_loader.chars, "Data and loaded model disagree on character set!"
         assert saved_vocab==data_loader.vocab, "Data and loaded model disagree on dictionary mappings!"
+        assert saved_tags==data_loader.tags, "Data and loaded model disagree on part of speech tags!"
+        assert saved_tag_dict==data_loader.tag_dict, "Data and loaded model disagree on dictionary mapping for part of speech tags!"
 
     if not os.path.exists(args.save_dir):
       os.makedirs(args.save_dir)
@@ -80,7 +82,7 @@ def train(args):
     with open(os.path.join(args.save_dir, 'config.pkl'), 'wb') as f:
         cPickle.dump(args, f)
     with open(os.path.join(args.save_dir, 'chars_vocab.pkl'), 'wb') as f:
-        cPickle.dump((data_loader.chars, data_loader.vocab), f)
+        cPickle.dump((data_loader.chars, data_loader.vocab, data_loader.tags, data_loader.tag_dict), f)
         
     model = Model(args)
 
